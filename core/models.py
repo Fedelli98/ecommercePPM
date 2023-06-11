@@ -1,17 +1,33 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 # Create your models here.
 class Customer(models.Model):
+    class Meta:
+        ordering = ("name",)
+        verbose_name_plural = "Customers"
+
     user = models.OneToOneField(User, null=True, blank=True, related_name='customer', on_delete=models.CASCADE)
     name = models.CharField(max_length=255, null=True)
     surname = models.CharField(max_length=255, null=True)
     email = models.CharField(max_length=255, null=True)
-    phone = models.CharField(max_length=255, null=True)
 
     def __str__(self):
         return self.name
+
+
+@receiver(post_save, sender=User)
+def assign_customer(sender, instance, created, **kwargs):
+    if created:
+        customer = Customer.objects.create(user=instance)
+        customer.name = instance.first_name
+        customer.surname = instance.last_name
+        customer.email = instance.email
+
+        customer.save()
 
 
 class Category(models.Model):
@@ -83,6 +99,7 @@ class Order(models.Model):
     def __str__(self):
         return str(self.id)
 
+    @property
     def get_cart_total(self):
         items_ordered = self.orderitem_set.all()
         total = 0
@@ -90,6 +107,7 @@ class Order(models.Model):
             total += item.get_total
         return total
 
+    @property
     def get_cart_items(self):
         items_quantity = self.orderitem_set.all()
         total = 0
@@ -111,6 +129,10 @@ class OrderItem(models.Model):
 
 
 class Address(models.Model):
+    class Meta:
+        ordering = ("address",)
+        verbose_name_plural = "Address"
+
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
     state = models.CharField(max_length=255, null=True)

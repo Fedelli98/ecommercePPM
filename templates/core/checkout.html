@@ -1,0 +1,161 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+    <a href="{% url "core:cart" %}" class="inline-flex">
+        <button class="flex items-center justify-center bg-white border border-black rounded-full px-4 py-2 text-black hover:text-gray-800 hover:bg-gray-200 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 transform rotate-180" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.707 14.707a1 1 0 010-1.414L14.586 10H7a1 1 0 010-2h7.586l-2.293-2.293a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            Torna al carrello
+        </button>
+    </a>
+    <div class="bg-gray-100 min-h-screen">
+        <div class="container mx-auto py-8">
+           <h1 class="text-3xl font-semibold mb-8">Checkout</h1>
+
+            <div class="grid grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">Shipping Information</h2>
+                    <form id="form" class="grid gap-4">
+                        <div id="userinfo" class="grid grid-cols-2 gap-4 border-b border-gray-300 pb-4">
+                            <div class="mb-4">
+                              <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                              <input type="text" id="name" name="name" class="form-input mt-1 block w-full" placeholder="Mario" required>
+                            </div>
+                            <div class="mb-4">
+                              <label for="name" class="block text-sm font-medium text-gray-700">Email</label>
+                              <input type="text" id="name" name="Email"class="form-input mt-1 block w-full" placeholder="Mario@email.com" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="name" class="block text-sm font-medium text-gray-700">Surname</label>
+                                <input type="text" id="name" name="Surname" class="form-input mt-1 block w-full" placeholder="Rossi" required>
+                            </div>
+                        </div>
+                        <div id="shippinginfo">
+                            <div  class="grid grid-cols-2 gap-4">
+                                <div class="mb-4">
+                                  <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                                  <input type="text" id="address" name="" class="form-input mt-1 block w-full" placeholder="via Roma" required>
+                                </div>
+                                <div class="mb-4">
+                                  <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                                  <input type="text" id="city" name="city" class="form-input mt-1 block w-full" placeholder="Roma" required>
+                                </div>
+                                <div class="mb-4">
+                                  <label for="state" class="block text-sm font-medium text-gray-700">State</label>
+                                  <input type="text" id="state" name="state" class="form-input mt-1 block w-full" placeholder="Italia" required>
+                                </div>
+                                <div class="mb-4">
+                                  <label for="zipcode" class="block text-sm font-medium text-gray-700">Zipcode</label>
+                                  <input type="text" id="zipcode" name="zipcode" class="form-input mt-1 block w-full" placeholder="20022" required>
+                                </div>
+                            </div>
+                            <button id="pay" class="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600">Place Order</button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                    <div>
+                        {%  for item in items %}
+                        <div class="flex items-center justify-between border-b border-gray-300 mb-4">
+                            <div class="flex items-center">
+                                <img src="{{ item.product.imageURL }}" class="h-20 w-20 object-contain rounded-lg" alt="Product Image">
+                                <div class="ml-4">
+                                    <p>{{ item.product.name }}</p>
+                                    <p>{{ item.product.category }}</p>
+                                    <p>{{ item.quantity }}</p>
+                                </div>
+                            </div>
+                            <p>${{ item.product.price }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="flex justify-between">
+                      <p class="text-lg font-semibold">Products:</p>
+                      <p class="text-lg">{{ order.get_cart_items }}</p>
+                    </div>
+                    <div class="flex justify-between">
+                      <p class="text-lg font-semibold">Total:</p>
+                      <p class="text-lg">${{ order.get_cart_total|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        if (user !== 'AnonymousUser'){
+            document.getElementById("userinfo").innerHTML = ''
+            document.getElementById("userinfo").classList.add("hidden")
+        }
+
+
+        const form = document.getElementById("form")
+        const total = '{{ order.get_cart_total }}'
+
+        form.addEventListener('submit', function(e){
+            e.preventDefault()
+        })
+
+        document.getElementById('pay').addEventListener('click', function(e){
+            checkoutFormData()
+        })
+        function checkoutFormData(){
+            console.log('payment button clicked')
+
+            const userformdata = {
+                'name':null,
+                'surname':null,
+                'email':null,
+                'total': total
+            }
+
+            const addressformdata = {
+                'address': null,
+                'city': null,
+                'state': null,
+                'zipcode': null,
+            }
+
+            addressformdata.address = form.address.value
+            addressformdata.city = form.city.value
+            addressformdata.state = form.state.value
+            addressformdata.zipcode = form.zipcode.value
+
+            if(user === 'AnonymousUser'){
+                userformdata.name = form.name.value
+                userformdata.surname = form.surname.value
+                userformdata.email = form.email.value
+            }
+
+            var url = ' /process_order/'
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type' : 'application/json',
+                    'X-CSRFToken' : csrftoken,
+                },
+                body: JSON.stringify({
+                    'form':userformdata,
+                    'shipping': addressformdata
+                }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Success:', data);
+                alert('Transaction Complete');
+                window.location.href = "{% url 'core:index' %}";
+            })
+        }
+
+    </script>
+{% endblock %}

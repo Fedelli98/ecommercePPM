@@ -6,10 +6,18 @@ from django.contrib.auth.models import User
 class SignupForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')
+        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
 
     username = forms.CharField(widget=forms.TextInput(attrs={
         'placeholder': 'Your Username',
+        'class': "w-full py-4 px-6 rounded-xl"
+    }))
+    first_name = forms.CharField(widget=forms.TextInput(attrs={
+        'placeholder': 'Your Name',
+        'class': "w-full py-4 px-6 rounded-xl"
+    }))
+    last_name = forms.CharField(widget=forms.TextInput(attrs={
+        'placeholder': 'Your Surname',
         'class': "w-full py-4 px-6 rounded-xl"
     }))
     email = forms.CharField(widget=forms.EmailInput(attrs={
@@ -35,4 +43,3 @@ class LoginForm(AuthenticationForm):
         'placeholder': 'Your Password',
         'class': "w-full py-4 px-6 rounded-xl"
     }))
-
