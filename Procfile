@@ -1,1 +1,1 @@
-web: gunicorn 'ecommercePPM.wsgi'
+web: gunicorn ecommercePPM.wsgi
