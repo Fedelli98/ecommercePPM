@@ -1,0 +1,6 @@
+# File system
+.env
+.DS_Store
+
+# Directories
+envs/
